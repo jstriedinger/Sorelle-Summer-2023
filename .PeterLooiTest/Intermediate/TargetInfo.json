@@ -1,0 +1,14 @@
+{
+	"Targets": [
+		{
+			"Name": "SorelleConcept",
+			"Path": "C:\\Users\\peter\\Documents\\Unreal Projects\\SorelleConcept\\Source\\SorelleConcept.Target.cs",
+			"Type": "Game"
+		},
+		{
+			"Name": "SorelleConceptEditor",
+			"Path": "C:\\Users\\peter\\Documents\\Unreal Projects\\SorelleConcept\\Source\\SorelleConceptEditor.Target.cs",
+			"Type": "Editor"
+		}
+	]
+}

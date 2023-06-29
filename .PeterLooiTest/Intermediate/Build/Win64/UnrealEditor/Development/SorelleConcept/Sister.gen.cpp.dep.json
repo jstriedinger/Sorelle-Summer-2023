@@ -1,0 +1,15 @@
+{
+    "Version": "1.2",
+    "Data": {
+        "Source": "c:\\users\\peter\\documents\\unreal projects\\sorelleconcept\\intermediate\\build\\win64\\unrealeditor\\inc\\sorelleconcept\\uht\\sister.gen.cpp",
+        "ProvidedModule": "",
+        "PCH": "c:\\users\\peter\\documents\\unreal projects\\sorelleconcept\\intermediate\\build\\win64\\sorelleconcepteditor\\development\\engine\\sharedpch.engine.shadowerrors.h.pch",
+        "Includes": [
+            "c:\\users\\peter\\documents\\unreal projects\\sorelleconcept\\intermediate\\build\\win64\\unrealeditor\\development\\sorelleconcept\\definitions.sorelleconcept.h",
+            "c:\\users\\peter\\documents\\unreal projects\\sorelleconcept\\source\\sorelleconcept\\sister.h",
+            "c:\\users\\peter\\documents\\unreal projects\\sorelleconcept\\intermediate\\build\\win64\\unrealeditor\\inc\\sorelleconcept\\uht\\sister.generated.h"
+        ],
+        "ImportedModules": [],
+        "ImportedHeaderUnits": []
+    }
+}
