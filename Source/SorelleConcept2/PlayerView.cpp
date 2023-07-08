@@ -61,6 +61,9 @@ void UPlayerView::TickComponent(float DeltaTime, ELevelTick TickType, FActorComp
 
 
 	SwitchSisters();
+
+
+	CurrentTime += DeltaTime;
 	//float y = GetOwner()->GetActorRotation().Yaw;
 	//std::string str = "" + std::to_string(y);
 

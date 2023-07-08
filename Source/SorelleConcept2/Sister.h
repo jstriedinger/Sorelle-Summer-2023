@@ -1,15 +1,42 @@
-// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include <vector>
 #include "Sister.generated.h"
+
+
+const float HORIZONTAL_FRICTION = .85;
+const float VERTICAL_FRICTION = .99;
+const float GRAVITY_CONSTANT = -.4;
+const float MAXIMUM_VIEW_PITCH = 70;
+const float CAMERA_DISTANCE_FROM_CHARACTER = 386;
+
+
+
+const float LIGHT_RAY_PERIOD_SECONDS = .5;
+const float LIGHT_RAY_NUM_BULLETS_YOU_CAN_FIRE_IN_A_PERIOD = 5;
+const float LIGHT_RAY_MIN_TIME_BETWEEN_CASTS = .05;
+const float LIGHT_RAY_MAXIMUM_NUMBER_OF_PREVIOUS_SHOOT_TIMES_TO_STORE = 100;
+const float LIGHT_RAY_SPAWN_HEIGHT = 150;
+const float LIGHT_RAY_SPAWN_SPACE_FROM_CHARACTER = 100;
+const float LIGHT_RAY_AIM_RAY_TRACE_DISTANCE = 15000;
+
 
 class UPlayerView;
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+
+
+
+/*
+USister is a component that is attached to the sister class
+USister contains all the code for the abilities that can be accessed from blueprints,
+as well as all the movement and view rotation
+
+*/
 class SORELLECONCEPT2_API USister : public UActorComponent
 {
 	GENERATED_BODY()
@@ -18,8 +45,21 @@ public:
 	// Sets default values for this component's properties
 	USister();
 
+	/*Abilities that you can call from blueprint*/
+	UFUNCTION(BlueprintCallable, Category = "SorelleStuff") virtual bool IsActiveSister();
+	UFUNCTION(BlueprintCallable, Category = "SorelleStuff") virtual void Jump(float force);
+	UFUNCTION(BlueprintCallable, Category = "SorelleStuff") virtual void Dash(float distance);
+	UFUNCTION(BlueprintCallable, Category = "SorelleStuff") virtual void Telekinesis();
+	UFUNCTION(BlueprintCallable, Category = "SorelleStuff") virtual void GrenadeLauncher();
+	UFUNCTION(BlueprintCallable, Category = "SorelleStuff") virtual void LightRay(float InitialMomentum);
+
 protected:
 	// Called when the game starts
+
+
+
+
+
 	virtual void BeginPlay() override;
 	UPlayerView* PlayerView;
 	APlayerController* PlayerController = NULL;
@@ -43,17 +83,20 @@ protected:
 
 	UPROPERTY(EditAnywhere) UClass* Projectile;
 
+	UPROPERTY(EditAnywhere) UClass* LightBullet;
+	TArray<float>* LightBulletTimes;
+
+	
+
+
+
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	virtual void Init(UPlayerView* PlayerView);
 	virtual void DoViewRotation();
 	virtual void DoMovement();
-	UFUNCTION(BlueprintCallable, Category = "SorelleStuff") virtual bool IsActiveSister();
-	UFUNCTION(BlueprintCallable, Category = "SorelleStuff") virtual void Jump(float force);
-	UFUNCTION(BlueprintCallable, Category = "SorelleStuff") virtual void Dash(float distance);
-	UFUNCTION(BlueprintCallable, Category = "SorelleStuff") virtual void Telekinesis();
-	UFUNCTION(BlueprintCallable, Category = "SorelleStuff") virtual void GrenadeLauncher();
+	
 	virtual bool IsGrounded();
 	virtual void DoGravity();
 	virtual void ApplyMomentum();
@@ -63,6 +106,8 @@ public:
 	virtual float GetHorizontalSpeed();
 	virtual void CharacterRotation();
 	virtual void TransitionMomentum(FVector);
+
+	virtual bool CanFireLightRay();
 	
 
 	virtual FVector MomentumRaycast();
@@ -73,6 +118,8 @@ public:
 	//UFUNCTION(BlueprintCallable, Category = "SorelleStuff")bool SpacePressed(){ PlayerController->IsInputKeyDown(EKeys::SpaceBar) }
 	UFUNCTION(BlueprintCallable, Category = "SorelleStuff")bool IsSpaceDown() { return PlayerController->IsInputKeyDown(EKeys::SpaceBar); }
 	UFUNCTION(BlueprintCallable, Category = "SorelleStuff")bool IsLeftMouseClicked() { return PlayerController->WasInputKeyJustPressed(EKeys::LeftMouseButton);}
+	UFUNCTION(BlueprintCallable, Category = "SorelleStuff")bool IsEKeyDown() { return PlayerController->IsInputKeyDown(EKeys::E); }
+
 	
 };
 

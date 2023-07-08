@@ -37,6 +37,8 @@ protected:
 
 	UPROPERTY(EditAnywhere) UClass* ExplosionClass;
 
+	float CurrentTime = 0;
+
 public:
 	USister* GetSisterA() { return SisterA; }
 	USister* GetSisterB() { return SisterB; }
@@ -51,4 +53,5 @@ public:
 	virtual AActor* GetTargetedObject();
 
 	virtual UClass* GetExplosion() { return ExplosionClass; }
+	virtual float GetTime() { return CurrentTime; }
 };
