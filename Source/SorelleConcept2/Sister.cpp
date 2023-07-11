@@ -107,8 +107,9 @@ void USister::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponen
 	ApplyMomentum();
 	CharacterRotation();
 	if (IsActiveSister())DoViewRotation();
-	MaintainTelekinesis();
 	Animation();
+
+	LightRayCooldown -= DeltaTime;
 	
 	
 		
@@ -117,11 +118,34 @@ void USister::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponen
 }
 
 
+float Abs(float f)
+{
+	if (f < 0)return -f;
+	return f;
+}
+
+/*
+* Activate the sister's Jump ability with a variable amount of jump force
+*/
+void USister::Jump(float force)
+{
+	//GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, "Jump!");
+	if (!IsGrounded())return;
+	GetOwner()->SetActorLocation(GetOwner()->GetActorLocation() + FVector(0, 0, 1));
+	Momentum = FVector(Momentum.X, Momentum.Y, Abs(force));
+	if (SkeletalMesh != NULL)
+	{
+		SkeletalMesh->PlayAnimation(Jumping, false);
+		AnimationStage = 2;
+	}
+
+}
 /*
 * Function that updates the direction that the character is facing
 */
 void USister::CharacterRotation()
 {
+	if (!IsActiveSister())return;
 	if (Momentum.Size2D() > .1)
 	{
 		GetOwner()->SetActorRotation(FRotator(0, Momentum.Rotation().Yaw - 90, 0));
@@ -483,23 +507,17 @@ void USister::DoViewRotation()
 }
 
 
-/*
-* Helper function for absolute value
-*/
-float Abs(float f)
+
+bool USister::CanFireLightRay(float LightRayPeriodSeconds, float LightRayNumBulletsYouCanFireInAPeriod, float LightRayCooldownTime)
 {
-	if (f < 0) return -f;
-	return f;
-}
-
-
-
-bool USister::CanFireLightRay()
-{
+	if (LightRayCooldown > 0)
+	{
+		return false;
+	}
 	if (LightBulletTimes->Num() == 0)return true;
 
 	float CurrentTime = PlayerView->GetTime();
-	float CurrentTimeMinusPeriod = CurrentTime - LIGHT_RAY_PERIOD_SECONDS;
+	float CurrentTimeMinusPeriod = CurrentTime - LightRayPeriodSeconds;
 
 
 	int NumLightBulletsFiredInTheLastXSeconds = 0;
@@ -513,7 +531,10 @@ bool USister::CanFireLightRay()
 		i--;
 	}
 
-	return (NumLightBulletsFiredInTheLastXSeconds < LIGHT_RAY_NUM_BULLETS_YOU_CAN_FIRE_IN_A_PERIOD);
+	
+	
+	if(NumLightBulletsFiredInTheLastXSeconds >= LightRayNumBulletsYouCanFireInAPeriod)LightRayCooldown = LightRayCooldownTime;
+	return (NumLightBulletsFiredInTheLastXSeconds < LightRayNumBulletsYouCanFireInAPeriod);
 
 
 
@@ -526,14 +547,22 @@ bool USister::CanFireLightRay()
 * at a speed of InitialMomentum
 * 
 */
-void USister::LightRay(float InitialMomentum)
+void USister::LightRay(float InitialMomentum, 
+	float LightRayPeriodSeconds,
+	float LightRayNumBulletsYouCanFireInAPeriod,
+	float LightRayMinTimeBetweenCasts,
+	float LightRayMaximumNumberOfPreviousShootTimesToStore,
+	float LightRaySpawnHeight,
+	float LightRaySpawnSpaceFromCharacter,
+	float LightRayAimRayTraceDistance,
+	float LightRayCooldownTime)
 {
 
 	//don't allow player to cast light ray every frame. That would be too fast
 	if (LightBulletTimes->Num() > 0)
 	{
 		float LastLightBulletCastTime = (*LightBulletTimes)[LightBulletTimes->Num() - 1];
-		if (PlayerView->GetTime() - LastLightBulletCastTime < LIGHT_RAY_MIN_TIME_BETWEEN_CASTS)
+		if (PlayerView->GetTime() - LastLightBulletCastTime < LightRayMinTimeBetweenCasts)
 		{
 			return;
 		}
@@ -542,7 +571,7 @@ void USister::LightRay(float InitialMomentum)
 
 
 	//Only 5 bullets allowed per .5 sec
-	if (!CanFireLightRay())
+	if (!CanFireLightRay(LightRayPeriodSeconds, LightRayNumBulletsYouCanFireInAPeriod, LightRayCooldownTime))
 	{
 		return;
 	}
@@ -551,9 +580,9 @@ void USister::LightRay(float InitialMomentum)
 
 
 	//don't keep track of more than 100 previous light ray times
-	if (LightBulletTimes->Num() > LIGHT_RAY_MAXIMUM_NUMBER_OF_PREVIOUS_SHOOT_TIMES_TO_STORE)
+	if (LightBulletTimes->Num() > LightRayMaximumNumberOfPreviousShootTimesToStore)
 	{
-		while (LightBulletTimes->Num() > LIGHT_RAY_MAXIMUM_NUMBER_OF_PREVIOUS_SHOOT_TIMES_TO_STORE)
+		while (LightBulletTimes->Num() > LightRayMaximumNumberOfPreviousShootTimesToStore)
 		{
 			LightBulletTimes->RemoveAt(0);
 		}
@@ -561,7 +590,7 @@ void USister::LightRay(float InitialMomentum)
 
 
 	//shoot a light ray originating from the character targeted at the crosshair
-	FVector SpawnLocation = GetOwner()->GetActorLocation() + FVector(0, 0, 150) + (PlayerView->GetOwner()->GetActorRotation().Vector() * LIGHT_RAY_SPAWN_SPACE_FROM_CHARACTER);
+	FVector SpawnLocation = GetOwner()->GetActorLocation() + FVector(0, 0, LightRaySpawnHeight) + (PlayerView->GetOwner()->GetActorRotation().Vector() * LightRaySpawnSpaceFromCharacter);
 
 	FHitResult HitResult;
 	FCollisionObjectQueryParams ObjectParams;
@@ -571,7 +600,7 @@ void USister::LightRay(float InitialMomentum)
 	FRotator SpawnRotation;
 	Params.AddIgnoredActor(this->GetOwner());
 
-	if (GetWorld()->LineTraceSingleByObjectType(HitResult, PlayerView->GetOwner()->GetActorLocation(), PlayerView->GetOwner()->GetActorLocation() + PlayerView->GetOwner()->GetActorRotation().Vector() * LIGHT_RAY_AIM_RAY_TRACE_DISTANCE, ObjectParams, Params))
+	if (GetWorld()->LineTraceSingleByObjectType(HitResult, PlayerView->GetOwner()->GetActorLocation(), PlayerView->GetOwner()->GetActorLocation() + PlayerView->GetOwner()->GetActorRotation().Vector() * LightRayAimRayTraceDistance, ObjectParams, Params))
 	{
 		FVector Target = HitResult.Location;
 		SpawnRotation = (Target - SpawnLocation).Rotation();
@@ -591,133 +620,6 @@ void USister::LightRay(float InitialMomentum)
 	P->SetPlayerView(PlayerView);
 }
 
-/*
-* Activate the sister's Jump ability with a variable amount of jump force
-*/
-void USister::Jump(float force)
-{
-	//GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, "Jump!");
-	if (!IsGrounded())return;
-	GetOwner()->SetActorLocation(GetOwner()->GetActorLocation() + FVector(0,0,1));
-	Momentum = FVector(Momentum.X, Momentum.Y, Abs(force));
-	if (SkeletalMesh != NULL)
-	{
-		SkeletalMesh->PlayAnimation(Jumping, false);
-		AnimationStage = 2;
-	}
-
-}
-
-
-/*
-* Activate the sister's Dash ability, dashing across variable distance
-*/
-void USister::Dash(float distance)
-{
-	float sinValue;
-	float cosValue;
-	float hrInRadians = FMath::DegreesToRadians(PlayerView->GetOwner()->GetActorRotation().Yaw);
-	FMath::SinCos(&sinValue, &cosValue, hrInRadians);
-	Momentum = FVector(distance * cosValue, distance * sinValue, Momentum.Z);
-}
-
-
-/*
-* Activate the sister's Telekinesis ability
-*/
-void USister::Telekinesis()
-{
-	if (TelekinesisObject == NULL)
-	{
-		AActor* TargetedObject = PlayerView->GetTargetedObject();
-		if (TargetedObject == NULL) return;
-		USceneObject* SO = Cast<USceneObject>(TargetedObject->GetComponentByClass(USceneObject::StaticClass()));
-		if(SO == NULL)return;
-
-		TelekinesisObject = TargetedObject;
-		TelekinesisDistance = FVector::Distance(PlayerView->GetOwner()->GetActorLocation(), TelekinesisObject->GetActorLocation());
-
-		SO->SetHandler(GetOwner());
-
-	}
-	else
-	{
-		Cast<USceneObject>(TelekinesisObject->GetComponentByClass(USceneObject::StaticClass()))->SetHandler(NULL);
-		TelekinesisObject = NULL;
-
-	}
-}
-
-
-/*
-* Called every frame
-* Keep the telekinesised object following the crosshair
-*/
-void USister::MaintainTelekinesis()
-{
-	if (PlayerView->GetActiveSister() == this)
-	{
-		if (TelekinesisObject != NULL)
-		{
-			FRotator viewRot = PlayerView->GetOwner()->GetActorRotation();
-
-			FVector TargetedLocation = PlayerView->GetOwner()->GetActorLocation() + viewRot.Vector() * TelekinesisDistance;
-			FVector ObjectLocation = TelekinesisObject->GetActorLocation();
-			Cast<USceneObject>(TelekinesisObject->GetComponentByClass(USceneObject::StaticClass()))->SetMomentum((TargetedLocation - ObjectLocation) * .15);
-
-			
-		}
-	}
-}
-
-/*
-* Activate the sister's Grenade Launcher ability
-*/
-void USister::GrenadeLauncher()
-{
-	FVector SpawnLocation = GetOwner()->GetActorLocation() + FVector(0, 0, 150) + (PlayerView->GetOwner()->GetActorRotation().Vector() * 100);
-
-
-
-	FHitResult HitResult;
-	FCollisionObjectQueryParams ObjectParams;
-	FCollisionQueryParams Params;
-
-	FVector SpawnMomentum;
-	FRotator SpawnRotation;
-	Params.AddIgnoredActor(this->GetOwner());
-
-	if (GetWorld()->LineTraceSingleByObjectType(HitResult, PlayerView->GetOwner()->GetActorLocation(), PlayerView->GetOwner()->GetActorLocation() + PlayerView->GetOwner()->GetActorRotation().Vector() * 15000, ObjectParams, Params))
-	{
-		FVector Target = HitResult.Location;
-		SpawnRotation = (Target - SpawnLocation).Rotation();
-		SpawnMomentum = SpawnRotation.Vector() * 30;
-		//GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, "Hit");
-	}
-	else
-	{
-		SpawnMomentum = (PlayerView->GetOwner()->GetActorRotation().Vector()) * 30;
-		SpawnRotation = PlayerView->GetOwner()->GetActorRotation();
-		//GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, "No hit");
-	}
-
-
-
-
-
-
-
-
-	AActor* ProjectileObject = GetWorld()->SpawnActor(Projectile, &SpawnLocation, &SpawnRotation);
-	UProjectileClass* P = Cast<UProjectileClass>(ProjectileObject->GetComponentByClass(UProjectileClass::StaticClass()));
-	P->Init(PlayerView);
-	P->SetMomentum(SpawnMomentum);
-
-
-
-
-	
-}
 
 /*
 * Get the sister's code name

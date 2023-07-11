@@ -14,14 +14,14 @@ const float MAXIMUM_VIEW_PITCH = 70;
 const float CAMERA_DISTANCE_FROM_CHARACTER = 386;
 
 
-
+/*
 const float LIGHT_RAY_PERIOD_SECONDS = .5;
 const float LIGHT_RAY_NUM_BULLETS_YOU_CAN_FIRE_IN_A_PERIOD = 5;
 const float LIGHT_RAY_MIN_TIME_BETWEEN_CASTS = .05;
 const float LIGHT_RAY_MAXIMUM_NUMBER_OF_PREVIOUS_SHOOT_TIMES_TO_STORE = 100;
 const float LIGHT_RAY_SPAWN_HEIGHT = 150;
 const float LIGHT_RAY_SPAWN_SPACE_FROM_CHARACTER = 100;
-const float LIGHT_RAY_AIM_RAY_TRACE_DISTANCE = 15000;
+const float LIGHT_RAY_AIM_RAY_TRACE_DISTANCE = 15000;*/
 
 
 class UPlayerView;
@@ -45,13 +45,35 @@ public:
 	// Sets default values for this component's properties
 	USister();
 
-	/*Abilities that you can call from blueprint*/
+	/*Functions that you can call from blueprint*/
 	UFUNCTION(BlueprintCallable, Category = "SorelleStuff") virtual bool IsActiveSister();
-	UFUNCTION(BlueprintCallable, Category = "SorelleStuff") virtual void Jump(float force);
-	UFUNCTION(BlueprintCallable, Category = "SorelleStuff") virtual void Dash(float distance);
-	UFUNCTION(BlueprintCallable, Category = "SorelleStuff") virtual void Telekinesis();
-	UFUNCTION(BlueprintCallable, Category = "SorelleStuff") virtual void GrenadeLauncher();
-	UFUNCTION(BlueprintCallable, Category = "SorelleStuff") virtual void LightRay(float InitialMomentum);
+
+	UFUNCTION(BlueprintCallable, Category = "SorelleStuff") virtual void LightRay(
+		float InitialMomentum,
+		float LIGHT_RAY_PERIOD_SECONDS,
+		float LIGHT_RAY_NUM_BULLETS_YOU_CAN_FIRE_IN_A_PERIOD,
+		float LIGHT_RAY_MIN_TIME_BETWEEN_CASTS,
+		float LIGHT_RAY_MAXIMUM_NUMBER_OF_PREVIOUS_SHOOT_TIMES_TO_STORE,
+		float LIGHT_RAY_SPAWN_HEIGHT,
+		float LIGHT_RAY_SPAWN_SPACE_FROM_CHARACTER,
+		float LIGHT_RAY_AIM_RAY_TRACE_DISTANCE,
+		float LightRayCooldownTime
+	
+	
+	);
+	UFUNCTION(BlueprintCallable, Category = "SorelleStuff") void Jump(float force);
+	UFUNCTION(BlueprintCallable, Category = "SorelleStuff")FString GetName();
+
+	//UFUNCTION(BlueprintCallable, Category = "SorelleStuff")bool SpacePressed(){ PlayerController->IsInputKeyDown(EKeys::SpaceBar) }
+	UFUNCTION(BlueprintCallable, Category = "SorelleStuff")bool IsSpaceDown() { return PlayerController->IsInputKeyDown(EKeys::SpaceBar); }
+	UFUNCTION(BlueprintCallable, Category = "SorelleStuff")bool IsLeftMouseClicked() { return PlayerController->WasInputKeyJustPressed(EKeys::LeftMouseButton); }
+	UFUNCTION(BlueprintCallable, Category = "SorelleStuff")bool IsEKeyDown() { return PlayerController->WasInputKeyJustPressed(EKeys::E); }
+
+
+
+
+
+	
 
 protected:
 	// Called when the game starts
@@ -67,6 +89,7 @@ protected:
 	UPROPERTY(EditAnywhere) float MovementSpeed = 10;
 	UPROPERTY(EditAnywhere) float PlayerHeight = 100;
 	UPROPERTY(EditAnywhere) float CameraVerticalOffset = 250;
+	float LightRayCooldown = 0;
 
 	AActor* TelekinesisObject=NULL;
 	float TelekinesisDistance;
@@ -79,10 +102,6 @@ protected:
 
 	int AnimationStage = 1;
 	USkeletalMeshComponent* SkeletalMesh;
-
-
-	UPROPERTY(EditAnywhere) UClass* Projectile;
-
 	UPROPERTY(EditAnywhere) UClass* LightBullet;
 	TArray<float>* LightBulletTimes;
 
@@ -101,24 +120,14 @@ public:
 	virtual void DoGravity();
 	virtual void ApplyMomentum();
 	virtual void DoFriction();
-	virtual void MaintainTelekinesis();
 	virtual void Animation();
 	virtual float GetHorizontalSpeed();
 	virtual void CharacterRotation();
 	virtual void TransitionMomentum(FVector);
-
-	virtual bool CanFireLightRay();
-	
-
 	virtual FVector MomentumRaycast();
 
-
-	UFUNCTION(BlueprintCallable, Category = "SorelleStuff")FString GetName();
-
-	//UFUNCTION(BlueprintCallable, Category = "SorelleStuff")bool SpacePressed(){ PlayerController->IsInputKeyDown(EKeys::SpaceBar) }
-	UFUNCTION(BlueprintCallable, Category = "SorelleStuff")bool IsSpaceDown() { return PlayerController->IsInputKeyDown(EKeys::SpaceBar); }
-	UFUNCTION(BlueprintCallable, Category = "SorelleStuff")bool IsLeftMouseClicked() { return PlayerController->WasInputKeyJustPressed(EKeys::LeftMouseButton);}
-	UFUNCTION(BlueprintCallable, Category = "SorelleStuff")bool IsEKeyDown() { return PlayerController->IsInputKeyDown(EKeys::E); }
+	virtual bool CanFireLightRay(float LIGHT_RAY_PERIOD_SECONDS, float LIGHT_RAY_NUM_BULLETS_YOU_CAN_FIRE_IN_A_PERIOD, float d);
+	
 
 	
 };
