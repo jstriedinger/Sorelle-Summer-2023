@@ -4,8 +4,6 @@
 #include "LightBulletScript.h"
 #include "PlayerView.h"
 #include <String>
-#include "MirrorComponent.h"
-#include "IlluminableComponent.h"
 #include "Misc/OutputDeviceNull.h"
 
 
@@ -99,19 +97,13 @@ void ULightBulletScript::CollisionDetection()
 
 		if (GetWorld()->LineTraceSingleByObjectType(HitResult, GetOwner()->GetActorLocation(), GetOwner()->GetActorLocation() + Momentum * 1.5, ObjectParams, Params))
 		{
-			//TODO!!!!!!!!!
 
-
-
-
-			//FMath::GetReflectionVector(HitResult.Normal, GetOwner()->GetActorRotation().Vector());
-
-			//StuckToObjectTime = 0;
-			//Momentum = FVector(0, 0, 0);
 			AActor* Collision = HitResult.GetActor();
-			UMirrorComponent* MC = Cast<UMirrorComponent>(Collision->GetComponentByClass(UMirrorComponent::StaticClass()));
-			UIlluminableComponent* IC = Cast<UIlluminableComponent>(Collision->GetComponentByClass(UIlluminableComponent::StaticClass()));
 			RecentHitResult = HitResult;
+			
+			FOutputDeviceNull OutputDeviceNull;
+			GetOwner()->CallFunctionByNameWithArguments(TEXT("OnCollision"), OutputDeviceNull, nullptr, true);
+			/*
 			if (MC != NULL)
 			{
 				//CollideWithMirror();
@@ -133,6 +125,7 @@ void ULightBulletScript::CollisionDetection()
 				FOutputDeviceNull OutputDeviceNull;
 				GetOwner()->CallFunctionByNameWithArguments(TEXT("CollideWithNormalObject"), OutputDeviceNull, nullptr, true);
 			}
+			*/
 		}
 	}
 
