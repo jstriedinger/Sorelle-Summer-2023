@@ -41,13 +41,33 @@ void ULightBulletScript::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 	CollisionDetection();
 
 	AvoidMemoryLeak();
+	DoSlowingDown();
+	DestroyTimerUpdate(DeltaTime);
 
-	StickToObject(DeltaTime);
+	
 
 	// ...
 }
 
-void ULightBulletScript::StickToObject(float DeltaTime)
+void ULightBulletScript::DoSlowingDown()
+{
+	
+	if (SlowingDown && !StickingToObject)
+	{
+		
+		FVector ShrunkSize = GetOwner()->GetActorScale3D() - FVector(ShrinkSpeed, ShrinkSpeed, ShrinkSpeed);
+		if(ShrunkSize.X > 0)
+			GetOwner()->SetActorScale3D(ShrunkSize);
+		Momentum *= SlowDownSpeed;
+		if (Momentum.Z > FallingSpeed)
+		{
+			Momentum -= FVector(0, 0, VerticalSpeedTransitionSpeed);
+		}
+		
+	}
+}
+
+void ULightBulletScript::DestroyTimerUpdate(float DeltaTime)
 {
 	
 	if (DestroyTimer != -1)
@@ -84,7 +104,7 @@ void ULightBulletScript::AvoidMemoryLeak()
 */
 void ULightBulletScript::CollisionDetection()
 {
-	if (DestroyTimer == -1)
+	if (!StickingToObject)
 	{
 		FHitResult HitResult;
 		FCollisionObjectQueryParams ObjectParams;
@@ -103,30 +123,11 @@ void ULightBulletScript::CollisionDetection()
 			
 			FOutputDeviceNull OutputDeviceNull;
 			GetOwner()->CallFunctionByNameWithArguments(TEXT("OnCollision"), OutputDeviceNull, nullptr, true);
-			/*
-			if (MC != NULL)
-			{
-				//CollideWithMirror();
-
-				FOutputDeviceNull OutputDeviceNull;
-				GetOwner()->CallFunctionByNameWithArguments(TEXT("CollideWithMirror"), OutputDeviceNull, nullptr, true);
-				
-			}
-			if (IC != NULL)
-			{
-				//CollideWithIlluminable();
-
-				FOutputDeviceNull OutputDeviceNull;
-				GetOwner()->CallFunctionByNameWithArguments(TEXT("CollideWithIlluminable"), OutputDeviceNull, nullptr, true);
-			}
-			if (MC == NULL && IC == NULL)
-			{
-				//CollideWithNormalObject();
-				FOutputDeviceNull OutputDeviceNull;
-				GetOwner()->CallFunctionByNameWithArguments(TEXT("CollideWithNormalObject"), OutputDeviceNull, nullptr, true);
-			}
-			*/
+			
 		}
+
+
+		
 	}
 
 	

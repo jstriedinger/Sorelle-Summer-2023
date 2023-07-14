@@ -38,6 +38,23 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "SorelleStuff")virtual FHitResult GetHitResult() { return RecentHitResult; }
 	UFUNCTION(BlueprintCallable, Category = "SorelleStuff")virtual void SetMaxLightBulletDistance(float F) { MaxLightBulletDistance = F; }
 
+	UFUNCTION(BlueprintCallable, Category = "SorelleStuff")
+	virtual void SlowDownAndHover(float SlowDownSpeedX, float FallingSpeedX, float TheDestroyTimer, float VerticalSpeedTransitionSpeed_, float ShrinkSpeed_)
+	{
+		if (!SlowingDown)
+		{
+			SlowingDown = true;
+			SlowDownSpeed = SlowDownSpeedX;
+			FallingSpeed = FallingSpeedX;
+			StartDestroyTimer(TheDestroyTimer);
+			VerticalSpeedTransitionSpeed = VerticalSpeedTransitionSpeed_;
+			ShrinkSpeed = ShrinkSpeed_;
+		}
+		
+	}
+	UFUNCTION(BlueprintCallable, Category = "SorelleStuff") virtual void StickToObject() { StickingToObject = true;  }
+	
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -51,6 +68,14 @@ protected:
 
 	float MaxLightBulletDistance = 2000;
 
+
+	bool SlowingDown = false;
+	float SlowDownSpeed = .99;
+	float FallingSpeed = 10;
+	float VerticalSpeedTransitionSpeed = 0;
+	bool StickingToObject = false;
+	float ShrinkSpeed = 0;
+
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
@@ -58,8 +83,10 @@ public:
 	virtual void CollisionDetection();
 	virtual void SetPlayerView(UPlayerView* UPV) { PV = UPV; }
 	virtual void AvoidMemoryLeak();
-	virtual void StickToObject(float f);
+	virtual void DestroyTimerUpdate(float f);
 	virtual void DestroyThisLightray();
+	virtual void DoSlowingDown();
+	
 
 	
 
