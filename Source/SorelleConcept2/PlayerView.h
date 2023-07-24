@@ -17,10 +17,12 @@ public:
 	// Sets default values for this component's properties
 	UPlayerView();
 
+	
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
-
+	
 
 
 	USister* SisterA;
@@ -54,4 +56,6 @@ public:
 
 	virtual UClass* GetExplosion() { return ExplosionClass; }
 	virtual float GetTime() { return CurrentTime; }
+	
+
 };

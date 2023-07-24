@@ -61,6 +61,14 @@ public:
 	
 	
 	);
+	UFUNCTION(BlueprintCallable, Category = "SorelleStuff") virtual void GroundPound(
+		float JumpSpeed,
+		float Gravity,
+		float FallSpeed,
+		float HoverTime,
+		float FallAcceleration,
+		float Cooldown
+	);
 	UFUNCTION(BlueprintCallable, Category = "SorelleStuff") void Jump(float force);
 	UFUNCTION(BlueprintCallable, Category = "SorelleStuff")FString GetName();
 
@@ -69,8 +77,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "SorelleStuff")bool IsLeftMouseClicked() { return PlayerController->WasInputKeyJustPressed(EKeys::LeftMouseButton); }
 	UFUNCTION(BlueprintCallable, Category = "SorelleStuff")bool IsEKeyDown() { return PlayerController->WasInputKeyJustPressed(EKeys::E); }
 
-
-
+	UFUNCTION(BlueprintCallable, Category = "SorelleStuff")FHitResult GetGroundPoundHitResult() { return GroundPoundHitResult; }
+	UFUNCTION(BlueprintCallable, Category = "SorelleStuff")void Impact(float Distance, float RecoverySpeed);
+	UFUNCTION(BlueprintCallable, Category = "SorelleStuff") void DustEffect(float InitialSize, float TheMaxSize, float TheSizeInc, float SpawnHeight);
+	
+	
 
 
 	
@@ -78,8 +89,18 @@ public:
 protected:
 	// Called when the game starts
 
+	int GroundPoundStage = -1;
+	float GroundPoundGravity;
+	float GroundPoundFallSpeed;
+	float GroundPoundHoverTime;
+	float GroundPoundFallAcceleration;
+	float GroundPoundTimer;
+	FHitResult GroundPoundHitResult;
+	float GroundPoundCooldown;
 
 
+	float ImpactDistance;
+	float ImpactRecoverySpeed;
 
 
 	virtual void BeginPlay() override;
@@ -103,6 +124,7 @@ protected:
 	int AnimationStage = 1;
 	USkeletalMeshComponent* SkeletalMesh;
 	UPROPERTY(EditAnywhere) UClass* LightBullet;
+	UPROPERTY(EditAnywhere) UClass* DustEffectClass;
 	TArray<float>* LightBulletTimes;
 
 	
@@ -128,7 +150,8 @@ public:
 
 	virtual bool CanFireLightRay(float LIGHT_RAY_PERIOD_SECONDS, float LIGHT_RAY_NUM_BULLETS_YOU_CAN_FIRE_IN_A_PERIOD, float d);
 	
-
+	virtual void GroundPoundTick(float a);
+	virtual void ImpactTick();
 	
 };
 

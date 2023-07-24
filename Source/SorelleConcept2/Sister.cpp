@@ -8,7 +8,8 @@
 #include "GenericPlatform/GenericPlatformMath.h"
 #include "ProjectileClass.h"
 #include "LightBulletScript.h"
-
+#include "Misc/OutputDeviceNull.h"
+#include "DustEffectScript.h"
 
 
 
@@ -108,7 +109,8 @@ void USister::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponen
 	CharacterRotation();
 	if (IsActiveSister())DoViewRotation();
 	Animation();
-
+	GroundPoundTick(DeltaTime);
+	ImpactTick();
 	LightRayCooldown -= DeltaTime;
 	
 	
@@ -291,8 +293,11 @@ float floorHeight = 0;
 */
 void USister::DoGravity()
 {
+	if (GroundPoundStage == -1)
+	{
+		Momentum += FVector(0, 0, GRAVITY_CONSTANT);
+	}
 	
-	Momentum += FVector(0, 0, GRAVITY_CONSTANT);
 	
 	
 }
@@ -503,7 +508,14 @@ void USister::DoViewRotation()
 
 	//Do view positioning
 	FVector actorRotationUnitVector = f.Vector();
-	PlayerView->GetOwner()->SetActorLocation(GetOwner()->GetActorLocation() + FVector(0,0, CameraVerticalOffset) + actorRotationUnitVector * CAMERA_DISTANCE_FROM_CHARACTER * -1);
+
+	PlayerView->GetOwner()->SetActorLocation
+	(
+		GetOwner()->GetActorLocation() + 
+		FVector(0,0, CameraVerticalOffset) + 
+		actorRotationUnitVector * CAMERA_DISTANCE_FROM_CHARACTER * -1 +
+		FVector(0,0,ImpactDistance)
+	);
 }
 
 
@@ -621,6 +633,108 @@ void USister::LightRay(float InitialMomentum,
 }
 
 
+
+
+void USister::GroundPound(
+	float JumpSpeed,
+	float Gravity,
+	float FallSpeed,
+	float HoverTime,
+	float FallAcceleration,
+	float Cooldown
+)
+{
+	if (GroundPoundStage != -1)
+	{
+		return;
+	}
+	Momentum = FVector(Momentum.X, Momentum.Y, JumpSpeed);
+	GroundPoundStage = 0;
+
+	GroundPoundFallSpeed = FallSpeed;
+	GroundPoundGravity = Gravity;
+	GroundPoundHoverTime = HoverTime;
+	GroundPoundFallAcceleration = FallAcceleration;
+	GroundPoundCooldown = Cooldown;
+	if (SkeletalMesh != NULL)
+	{
+		SkeletalMesh->PlayAnimation(Jumping, false);
+		AnimationStage = 2;
+	}
+
+}
+void USister::GroundPoundTick(float DeltaTime)
+{
+	GroundPoundCooldown -= DeltaTime;
+	if (GroundPoundStage == -1)return;
+
+
+	if (GroundPoundStage == 0)
+	{
+		Momentum -= FVector(0, 0, GroundPoundGravity);
+		if (Momentum.Z <= 0)
+		{
+			Momentum = FVector(Momentum.X, Momentum.Y, 0);
+			GroundPoundStage++;
+			GroundPoundTimer = 0;
+		}
+	}
+	else if (GroundPoundStage == 1)
+	{
+		GroundPoundTimer += DeltaTime;
+		if (GroundPoundTimer >= GroundPoundHoverTime)
+		{
+			GroundPoundStage++;
+		}
+	}
+	else if (GroundPoundStage == 2)
+	{
+		if (Momentum.Z > -GroundPoundFallSpeed)
+		{
+			Momentum += FVector(0, 0, -GroundPoundFallAcceleration);
+		}
+		else
+		{
+			Momentum = FVector(Momentum.X, Momentum.Y, -GroundPoundFallSpeed);
+		}
+
+		
+
+		FHitResult HitResult;
+		FCollisionObjectQueryParams ObjectParams;
+		FCollisionQueryParams Params;
+
+		Params.AddIgnoredActor(this->GetOwner());
+		
+
+		if (GetWorld()->LineTraceSingleByObjectType(HitResult, GetOwner()->GetActorLocation(), GetOwner()->GetActorLocation() + FVector(0, 0, -1.5), ObjectParams, Params))
+		
+		{
+			GroundPoundHitResult = HitResult;
+			FOutputDeviceNull OutputDeviceNull;
+			GetOwner()->CallFunctionByNameWithArguments(TEXT("GroundPoundCollision"), OutputDeviceNull, nullptr, true);
+			GroundPoundStage++;
+			Momentum = FVector(Momentum.X, Momentum.Y, 0);
+		}
+
+
+
+
+	}
+	else if (GroundPoundStage == 3)
+	{
+		if (GroundPoundCooldown < 0)
+		{
+			GroundPoundStage = -1;
+		}
+	}
+
+
+}
+
+
+
+
 /*
 * Get the sister's code name
 */
@@ -659,4 +773,31 @@ FVector USister::MomentumRaycast()
 		Ret = HitResult.Location;
 	}
 	return Ret;
+}
+
+
+
+void USister::Impact(float Distance, float RecoverySpeed)
+{ 
+	ImpactDistance = Distance;
+	ImpactRecoverySpeed = RecoverySpeed;
+}
+void USister::ImpactTick()
+{
+
+	if (Abs(ImpactDistance) <= Abs(ImpactRecoverySpeed))
+	{
+		ImpactDistance = 0;
+	}
+	ImpactDistance -= ImpactRecoverySpeed;
+}
+void USister::DustEffect(float InitialSize, float TheMaxSize, float TheSizeInc, float SpawnHeight)
+{
+	FVector SpawnLocation = GetOwner()->GetActorLocation() + FVector(0,0,SpawnHeight);
+	FRotator SpawnRotation = FRotator(0, 0, 0);
+	AActor* Dust = GetWorld()->SpawnActor(DustEffectClass, &SpawnLocation, &SpawnRotation);
+	UDustEffectScript* DustScript = Cast<UDustEffectScript>(Dust->GetComponentByClass(UDustEffectScript::StaticClass()));
+	DustScript->Init(InitialSize, TheMaxSize, TheSizeInc);
+
+
 }
