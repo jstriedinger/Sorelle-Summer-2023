@@ -295,7 +295,11 @@ void USister::DoGravity()
 {
 	if (GroundPoundStage == -1)
 	{
-		Momentum += FVector(0, 0, GRAVITY_CONSTANT);
+		if (CanDoGravity)
+		{
+			Momentum += FVector(0, 0, GRAVITY_CONSTANT);
+		}
+		
 	}
 	
 	
@@ -801,3 +805,4 @@ void USister::DustEffect(float InitialSize, float TheMaxSize, float TheSizeInc, 
 
 
 }
+AActor* USister::GetCamera() { return PlayerView->GetOwner(); }

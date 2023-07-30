@@ -80,8 +80,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "SorelleStuff")FHitResult GetGroundPoundHitResult() { return GroundPoundHitResult; }
 	UFUNCTION(BlueprintCallable, Category = "SorelleStuff")void Impact(float Distance, float RecoverySpeed);
 	UFUNCTION(BlueprintCallable, Category = "SorelleStuff") void DustEffect(float InitialSize, float TheMaxSize, float TheSizeInc, float SpawnHeight);
-	
-	
+	UFUNCTION(BlueprintCallable, Category = "SorelleStuff") AActor* GetCamera();
+
+
+	UFUNCTION(BlueprintCallable, Category = "SorelleStuff") void SetMomentum(FVector Mom) { Momentum = Mom; }
+	UFUNCTION(BlueprintCallable, Category = "SorelleStuff") FVector GetMomentum() { return Momentum; }
+
+	UFUNCTION(BlueprintCallable, Category = "SorelleStuff") void SetCanDoGravity(bool b) { CanDoGravity = b; }
 
 
 	
@@ -97,6 +102,7 @@ protected:
 	float GroundPoundTimer;
 	FHitResult GroundPoundHitResult;
 	float GroundPoundCooldown;
+	bool CanDoGravity = true;
 
 
 	float ImpactDistance;

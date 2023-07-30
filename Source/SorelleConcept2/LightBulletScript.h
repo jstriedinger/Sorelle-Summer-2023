@@ -32,6 +32,7 @@ public:
 	// Sets default values for this component's properties
 	ULightBulletScript();
 
+	
 	UFUNCTION(BlueprintCallable, Category = "SorelleStuff")virtual void SetMomentum(FVector M);
 	UFUNCTION(BlueprintCallable, Category = "SorelleStuff")virtual FVector GetMomentum() { return Momentum; }
 	UFUNCTION(BlueprintCallable, Category = "SorelleStuff")virtual void StartDestroyTimer(float Time) { DestroyTime = Time; DestroyTimer = 0; }
@@ -81,7 +82,7 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	
 	virtual void CollisionDetection();
-	virtual void SetPlayerView(UPlayerView* UPV) { PV = UPV; }
+	UFUNCTION(BlueprintCallable, Category = "SorelleStuff")  void SetPlayerView(UPlayerView* UPV) { PV = UPV; }
 	virtual void AvoidMemoryLeak();
 	virtual void DestroyTimerUpdate(float f);
 	virtual void DestroyThisLightray();
