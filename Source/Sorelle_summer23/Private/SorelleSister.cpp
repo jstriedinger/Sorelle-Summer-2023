@@ -45,9 +45,10 @@ ASorelleSister::ASorelleSister()
 	CameraBoom->bUsePawnControlRotation = true; // Rotate the arm based on the controller
 
 	// Create a follow camera
-	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
+	/*FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
+	*/
 	
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
@@ -65,6 +66,19 @@ void ASorelleSister::BeginPlay()
 	//Add Input Mapping Context
 	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
 	{
+		// instantiate an actor for the camera to attach to
+		ViewActor = GetWorld()->SpawnActor<AActor>(AActor::StaticClass(), PlayerController->GetPawn()->GetActorLocation(),PlayerController->GetPawn()->GetActorRotation());
+
+		// attach a camera to the actor
+		FollowCamera = static_cast<UCameraComponent*> (ViewActor->AddComponentByClass(UCameraComponent::StaticClass(),false,FTransform(),false));
+		FollowCamera->bUsePawnControlRotation = false;
+
+		// attach the actor to the starting active character's camera boom
+		ASorelleSister* MySisterCharacter = static_cast<ASorelleSister*>(PlayerController->GetPawn());
+		ViewActor->AttachToComponent(ASorelleSister::GetCameraBoom(),FAttachmentTransformRules(EAttachmentRule::SnapToTarget,true),USpringArmComponent::SocketName);
+
+		// Set the view to the created camera
+		PlayerController->SetViewTarget(ViewActor);
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 		{
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);

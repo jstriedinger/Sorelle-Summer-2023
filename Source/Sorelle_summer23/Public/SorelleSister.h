@@ -46,7 +46,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sorelle)
 	APawn* PrevSister;
-	
+
+	// Actor that the camera is attached to
+	AActor* ViewActor;
 
 public:
 	// Sets default values for this character's properties
