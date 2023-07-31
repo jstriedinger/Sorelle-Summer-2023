@@ -10,6 +10,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "SisterController.h"
 #include "Kismet/GameplayStatics.h"
 
 // Sets default values
@@ -66,6 +67,7 @@ void ASorelleSister::BeginPlay()
 	//Add Input Mapping Context
 	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
 	{
+		/*
 		// instantiate an actor for the camera to attach to
 		ViewActor = GetWorld()->SpawnActor<AActor>(AActor::StaticClass(), PlayerController->GetPawn()->GetActorLocation(),PlayerController->GetPawn()->GetActorRotation());
 
@@ -78,19 +80,23 @@ void ASorelleSister::BeginPlay()
 		ViewActor->AttachToComponent(ASorelleSister::GetCameraBoom(),FAttachmentTransformRules(EAttachmentRule::SnapToTarget,true),USpringArmComponent::SocketName);
 
 		// Set the view to the created camera
-		PlayerController->SetViewTarget(ViewActor);
+		PlayerController->SetViewTarget(ViewActor);*/
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 		{
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
 	}
 
+	// get the the first (and only) player controller and add this pawn to its list of controlled pawns, using getworld's function call is critical bc only the first spawned pawn gets a player controller
+	ASisterController* MyPController = static_cast<ASisterController*>(GetWorld()->GetFirstPlayerController());
+	if(MyPController)
+	{
+		MyPController->SetupNewSister(static_cast<APawn*>(this));
+		//MyPController->AddPawnToList(static_cast<APawn*>(this));
+	}
+
 	//set this pawn as the first of the sisters array
 	APawn* MyPawn = UGameplayStatics::GetPlayerController(this, 0)->GetPawn();
-	if( MyPawn != nullptr)
-	{
-		
-	}
 }
 
 // Called every frame
@@ -157,9 +163,19 @@ void ASorelleSister::Look(const FInputActionValue& Value)
 	}
 }
 
-void ASorelleSister::SwapSister()
+void ASorelleSister::SwapSister(const FInputActionValue& Value)
 {
-	
+	const float dir = Value.Get<float>();
+	ASisterController* MyPController = Cast<ASisterController>(Controller);
+	if(dir > 0)
+		MyPController->SwapPawn(NextSister);
+	else
+	{
+		MyPController->SwapPawn(PrevSister);
+	}
+	if(GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Swap")));
+
 }
 
 

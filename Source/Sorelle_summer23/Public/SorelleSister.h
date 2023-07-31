@@ -62,7 +62,7 @@ protected:
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
 
-	void SwapSister();
+	void SwapSister(const FInputActionValue& Value);
 
 protected:
 	// APawn interface
