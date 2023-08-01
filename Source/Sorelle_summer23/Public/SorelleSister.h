@@ -55,16 +55,13 @@ public:
 	ASorelleSister();
 	
 protected:
-
 	/** Called for movement input */
-	void Move(const FInputActionValue& Value);
+	virtual void Move(const FInputActionValue& Value);
 
 	/** Called for looking input */
-	void Look(const FInputActionValue& Value);
+	virtual void Look(const FInputActionValue& Value);
 
-	void SwapSister(const FInputActionValue& Value);
-
-protected:
+	virtual void SwapSister(const FInputActionValue& Value);
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	

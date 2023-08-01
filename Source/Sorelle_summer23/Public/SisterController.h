@@ -14,9 +14,6 @@ class SORELLE_SUMMER23_API ASisterController : public APlayerController
 {
 	GENERATED_BODY()
 public:
-	// Add's a pawn to the owned pawns list
-	void AddPawnToList(class APawn* pawn);
-
 	void SetupNewSister(class APawn* newSister);
 
 	// switches the active pawn
@@ -27,14 +24,7 @@ public:
 	void BeginPlay() override;
 	void Tick(float DeltaSeconds) override;
 
-private:
-	// Array of pawns that are controlled by this controller
-	UPROPERTY()
-	TArray<class APawn*> Pawns;
-
-	// current possessed pawn
-	int PawnIndex = 0;
-
+protected:
 	APawn* SisterToControl;
 
 private:
@@ -54,10 +44,4 @@ private:
 	// bool tracking if swapping
 	bool CompletedSwap = true;
 
-	// Vector tracking listener probe position during a swap
-	FVector ProbePosition;
-
-	// pointer to the previously possessed pawn
-	class ASorelleSister* MyPrevProjectCharacter;
-	
 };

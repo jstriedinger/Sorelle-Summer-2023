@@ -6,12 +6,6 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 
-void ASisterController::AddPawnToList(APawn* pawn)
-{
-	if(pawn != nullptr)
-		Pawns.EmplaceAt(0,pawn);
-}
-
 void ASisterController::SetupNewSister(APawn* newSister)
 {
 	if(newSister != nullptr)
@@ -24,26 +18,25 @@ void ASisterController::SwapPawn(APawn* sister)
 	if(!CompletedSwap)
 		return;
 
+	
 	SisterToControl = sister;
 	// get the rotation of the current pawn before possessing
-	//MyPrevProjectCharacter = static_cast<ASorelleSister*>(Pawns[PawnIndex]);
-	MyPrevProjectCharacter = static_cast<ASorelleSister*>(SisterToControl);
 	FRotator oldRotate = GetControlRotation();
-	//PawnIndex = (PawnIndex + 1) % Pawns.Num();
 
 	// switch the state to swapping
 	CompletedSwap = false;
 	SwappingTime = 0.0f;
 
-	// remove the camera from the pawn's camera boom
+	// remove the actor being used for the camera to follow
 	ViewActor->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 
 	// take control of the next pawn
 	Possess(SisterToControl);
-	//Possess(Pawns[PawnIndex]);
-
 	// set the camera boom of the new pawn to the same as the old pawn
 	SetControlRotation(oldRotate);
+	if(GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Swapping")));
+
 }
 
 ASisterController::ASisterController()
@@ -65,8 +58,8 @@ void ASisterController::BeginPlay()
 	FollowCamera->bUsePawnControlRotation = false;
 
 	// attach the actor to the starting active character's camera boom
-	ASorelleSister* MyProjectCharacter = static_cast<ASorelleSister*>(GetPawn());
-	ViewActor->AttachToComponent(MyProjectCharacter->GetCameraBoom(),FAttachmentTransformRules(EAttachmentRule::SnapToTarget,true),USpringArmComponent::SocketName);
+	ASorelleSister* MySisterCharacter = static_cast<ASorelleSister*>(GetPawn());
+	ViewActor->AttachToComponent(MySisterCharacter->GetCameraBoom(),FAttachmentTransformRules(EAttachmentRule::SnapToTarget,true),USpringArmComponent::SocketName);
 
 	// Set the view to the created camera
 	SetViewTarget(ViewActor);
@@ -80,7 +73,8 @@ void ASisterController::Tick(float DeltaSeconds)
 	if(!CompletedSwap)
 	{
 		SwappingTime += DeltaSeconds;
-		ASorelleSister* MyProjectCharacter = static_cast<ASorelleSister*>(SisterToControl);
+		//get character of this controller
+		ASorelleSister* MyProjectCharacter = static_cast<ASorelleSister*>(GetCharacter());
 
 		// Lerp the camera to the new boom location
 		FVector Location = FMath::Lerp(ViewActor->GetActorLocation(),MyProjectCharacter->GetCameraBoom()->GetSocketLocation(USpringArmComponent::SocketName),SwappingTime/TimeToSwap);

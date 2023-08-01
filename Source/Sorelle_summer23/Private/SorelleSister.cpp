@@ -167,15 +167,13 @@ void ASorelleSister::SwapSister(const FInputActionValue& Value)
 {
 	const float dir = Value.Get<float>();
 	ASisterController* MyPController = Cast<ASisterController>(Controller);
-	if(dir > 0)
+	if(dir > 0 && NextSister != nullptr) 
 		MyPController->SwapPawn(NextSister);
-	else
+	else if(PrevSister != nullptr)
 	{
 		MyPController->SwapPawn(PrevSister);
 	}
-	if(GEngine)
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Swap")));
-
+	
 }
 
 
