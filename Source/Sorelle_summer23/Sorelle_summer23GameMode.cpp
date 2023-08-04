@@ -12,4 +12,6 @@ ASorelle_summer23GameMode::ASorelle_summer23GameMode()
 	{
 		DefaultPawnClass = PlayerPawnBPClass.Class;
 	}
+
+	
 }
