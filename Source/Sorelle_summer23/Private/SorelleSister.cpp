@@ -124,7 +124,14 @@ void ASorelleSister::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		//swapping by blueprint
 		EnhancedInputComponent->BindAction(SwapAction, ETriggerEvent::Triggered, this, &ASorelleSister::SwapSister);
 
+		//Ability
+		EnhancedInputComponent->BindAction(AbilityAction, ETriggerEvent::Triggered, this, &ASorelleSister::UseAbility);
 	}
+}
+
+void ASorelleSister::UseAbility(const FInputActionValue& Value)
+{
+	DoAbility();
 }
 
 void ASorelleSister::Move(const FInputActionValue& Value)

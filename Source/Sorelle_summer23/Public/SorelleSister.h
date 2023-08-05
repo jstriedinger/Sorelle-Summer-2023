@@ -40,6 +40,11 @@ class SORELLE_SUMMER23_API ASorelleSister : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputAction* SwapAction;
 
+
+	/** Look Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputAction* AbilityAction;
+
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sorelle)
 	APawn* NextSister;
@@ -49,6 +54,11 @@ protected:
 
 	// Actor that the camera is attached to
 	AActor* ViewActor;
+
+
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "ZZZ")
+		void DoAbility();
 
 public:
 	// Sets default values for this character's properties
@@ -62,6 +72,8 @@ protected:
 	virtual void Look(const FInputActionValue& Value);
 
 	virtual void SwapSister(const FInputActionValue& Value);
+
+	virtual void UseAbility(const FInputActionValue& Value);
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	

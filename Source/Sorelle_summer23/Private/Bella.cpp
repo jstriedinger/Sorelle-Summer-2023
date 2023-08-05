@@ -33,4 +33,5 @@ void ABella::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 void ABella::BeginPlay()
 {
 	Super::BeginPlay();
+	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, "Bella init");
 }
