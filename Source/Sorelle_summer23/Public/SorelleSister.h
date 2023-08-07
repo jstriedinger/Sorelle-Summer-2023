@@ -40,10 +40,10 @@ class SORELLE_SUMMER23_API ASorelleSister : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputAction* SwapAction;
 
-
 	/** Look Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputAction* AbilityAction;
+
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sorelle)
@@ -55,11 +55,17 @@ protected:
 	// Actor that the camera is attached to
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sorelle)
 	AActor* ViewActor;
+	
 
-
-
-	UFUNCTION(BlueprintImplementableEvent, Category = "ZZZ")
+	UFUNCTION(BlueprintImplementableEvent, Category = "Sorelle")
 	void DoAbility();
+	
+	UFUNCTION(BlueprintCallable, Category="Sorelle")
+	void SwapToSpecificSister(APawn* SisterToSwapInto);
+
+	//Function to call pn BP when setting up a sister
+	UFUNCTION(BlueprintCallable, Category="Sorelle")
+	void SetupSisters(APawn* NSister, APawn* PSister);
 
 public:
 	// Sets default values for this character's properties
@@ -72,7 +78,7 @@ protected:
 	/** Called for looking input */
 	virtual void Look(const FInputActionValue& Value);
 
-	virtual void SwapSister(const FInputActionValue& Value);
+	virtual void SwapNextPrevSister(const FInputActionValue& Value);
 
 	virtual void UseAbility(const FInputActionValue& Value);
 	// APawn interface

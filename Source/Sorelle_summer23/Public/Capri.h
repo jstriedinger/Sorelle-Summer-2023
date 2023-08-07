@@ -24,7 +24,7 @@ protected:
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value) override;
 
-	void SwapSister(const FInputActionValue& Value) override;
+	void SwapNextPrevSister(const FInputActionValue& Value) override;
 	// APawn interface
 	void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	

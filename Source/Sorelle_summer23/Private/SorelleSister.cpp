@@ -13,6 +13,8 @@
 #include "SisterController.h"
 #include "Kismet/GameplayStatics.h"
 
+
+
 // Sets default values
 ASorelleSister::ASorelleSister()
 {
@@ -92,7 +94,6 @@ void ASorelleSister::BeginPlay()
 	if(MyPController)
 	{
 		MyPController->SetupNewSister(static_cast<APawn*>(this));
-		//MyPController->AddPawnToList(static_cast<APawn*>(this));
 	}
 
 	//set this pawn as the first of the sisters array
@@ -122,7 +123,7 @@ void ASorelleSister::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		//Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ASorelleSister::Look);
 		//swapping by blueprint
-		EnhancedInputComponent->BindAction(SwapAction, ETriggerEvent::Triggered, this, &ASorelleSister::SwapSister);
+		EnhancedInputComponent->BindAction(SwapAction, ETriggerEvent::Triggered, this, &ASorelleSister::SwapNextPrevSister);
 
 		//Ability
 		EnhancedInputComponent->BindAction(AbilityAction, ETriggerEvent::Triggered, this, &ASorelleSister::UseAbility);
@@ -170,17 +171,32 @@ void ASorelleSister::Look(const FInputActionValue& Value)
 	}
 }
 
-void ASorelleSister::SwapSister(const FInputActionValue& Value)
+void ASorelleSister::SwapNextPrevSister(const FInputActionValue& Value)
 {
 	const float dir = Value.Get<float>();
-	ASisterController* MyPController = Cast<ASisterController>(Controller);
-	if(dir > 0 && NextSister != nullptr) 
-		MyPController->SwapPawn(NextSister);
-	else if(PrevSister != nullptr)
-	{
-		MyPController->SwapPawn(PrevSister);
-	}
 	
+	if(dir > 0 && NextSister != nullptr)
+		SwapToSpecificSister(NextSister);
+	else if(PrevSister != nullptr)
+		SwapToSpecificSister(PrevSister);
+	
+}
+
+void ASorelleSister::SwapToSpecificSister(APawn* SisterToSwapInto)
+{
+	if(SisterToSwapInto != nullptr)
+	{
+		ASisterController* MyPController = Cast<ASisterController>(Controller);
+		MyPController->SwapPawn(SisterToSwapInto);
+	}
+}
+
+void ASorelleSister::SetupSisters(APawn* NSister, APawn* PSister)
+{
+	if(NSister != nullptr)
+		NextSister = NSister;
+	if(PSister != nullptr)
+		PrevSister = PSister;
 }
 
 

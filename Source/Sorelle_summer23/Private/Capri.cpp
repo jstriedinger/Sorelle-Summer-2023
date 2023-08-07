@@ -18,10 +18,9 @@ void ACapri::Look(const FInputActionValue& Value)
 	Super::Look(Value);
 }
 
-void ACapri::SwapSister(const FInputActionValue& Value)
+void ACapri::SwapNextPrevSister(const FInputActionValue& Value)
 {
-	Super::SwapSister(Value);
-	UE_LOG(LogTemp, Warning, TEXT("Bella swapping"));
+	Super::SwapNextPrevSister(Value);
 }
 
 void ACapri::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

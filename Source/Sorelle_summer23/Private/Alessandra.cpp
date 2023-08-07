@@ -19,10 +19,9 @@ void AAlessandra::Look(const FInputActionValue& Value)
 	Super::Look(Value);
 }
 
-void AAlessandra::SwapSister(const FInputActionValue& Value)
+void AAlessandra::SwapNextPrevSister(const FInputActionValue& Value)
 {
-	Super::SwapSister(Value);
-	UE_LOG(LogTemp, Warning, TEXT("Bella swapping"));
+	Super::SwapNextPrevSister(Value);
 }
 
 void AAlessandra::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

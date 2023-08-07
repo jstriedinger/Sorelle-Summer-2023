@@ -19,10 +19,9 @@ void ABella::Look(const FInputActionValue& Value)
 	Super::Look(Value);
 }
 
-void ABella::SwapSister(const FInputActionValue& Value)
+void ABella::SwapNextPrevSister(const FInputActionValue& Value)
 {
-	Super::SwapSister(Value);
-	UE_LOG(LogTemp, Warning, TEXT("Bella swapping"));
+	Super::SwapNextPrevSister(Value);
 }
 
 void ABella::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
