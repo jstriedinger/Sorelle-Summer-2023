@@ -32,5 +32,4 @@ void ACapri::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 void ACapri::BeginPlay()
 {
 	Super::BeginPlay();
-	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, "Capri init");
 }

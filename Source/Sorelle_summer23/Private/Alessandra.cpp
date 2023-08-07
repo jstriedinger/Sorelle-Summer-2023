@@ -33,5 +33,4 @@ void AAlessandra::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 void AAlessandra::BeginPlay()
 {
 	Super::BeginPlay();
-	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, "Alessandra init");
 }

@@ -53,12 +53,13 @@ protected:
 	APawn* PrevSister;
 
 	// Actor that the camera is attached to
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sorelle)
 	AActor* ViewActor;
 
 
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "ZZZ")
-		void DoAbility();
+	void DoAbility();
 
 public:
 	// Sets default values for this character's properties
